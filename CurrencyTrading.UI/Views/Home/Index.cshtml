@@ -1,0 +1,36 @@
+﻿@model List<CurrencyTrading.Business.Models.TradeUpdate>
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Currency Trading Simulator</title>
+</head>
+<body>
+    <h1>Currency Trading Rates</h1>
+    <table>
+        <thead>
+            <tr>
+                <th>Currency Pair</th>
+                <th>Current Rate</th>
+                <th>Change</th>
+                <th>Change %</th>
+                <th>Last Update</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var rate in Model)
+            {
+                <tr>
+                    <td>@rate.PairId</td>
+                    <td>@rate.NewRate.ToString("F4")</td>
+                    <td>@rate.Change.ToString("F4")</td>
+                    <td>@rate.ChangePercent.ToString("F2")%</td>
+                    <td>@rate.Timestamp.ToString("HH:mm:ss")</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</body>
+</html>
