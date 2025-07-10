@@ -1,4 +1,5 @@
-﻿namespace CurrencyTrading.Business.Models
+﻿
+namespace CurrencyTrading.Business.Models
 {
     public class TradeUpdate
     {

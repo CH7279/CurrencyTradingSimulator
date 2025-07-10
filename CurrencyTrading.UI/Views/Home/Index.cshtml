@@ -1,36 +1,143 @@
-﻿@model List<CurrencyTrading.Business.Models.TradeUpdate>
+﻿@model List<CurrencyTrading.Business.Models.CurrencyPairViewModel>
+@{
+    ViewData["Title"] = "דשבורד מסחר";
+}
 
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Currency Trading Simulator</title>
-</head>
-<body>
-    <h1>Currency Trading Rates</h1>
-    <table>
-        <thead>
-            <tr>
-                <th>Currency Pair</th>
-                <th>Current Rate</th>
-                <th>Change</th>
-                <th>Change %</th>
-                <th>Last Update</th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach (var rate in Model)
-            {
-                <tr>
-                    <td>@rate.PairId</td>
-                    <td>@rate.NewRate.ToString("F4")</td>
-                    <td>@rate.Change.ToString("F4")</td>
-                    <td>@rate.ChangePercent.ToString("F2")%</td>
-                    <td>@rate.Timestamp.ToString("HH:mm:ss")</td>
-                </tr>
-            }
-        </tbody>
-    </table>
-</body>
-</html>
+<div class="main-container">
+    <!-- Header with stats -->
+    <div class="header-section">
+        <div class="header-content">
+            <h1 class="main-title">
+                <div class="title-icon">
+                    <i class="fas fa-chart-line"></i>
+                </div>
+                Currency Trading Simulator
+                <div class="last-update">
+                    Last Update: <span id="lastUpdateTime">@DateTime.Now.ToString("HH:mm:ss")</span>
+                </div>
+            </h1>
+
+            <div class="controls">
+                <button id="pauseBtn" class="btn-control btn-pause">
+                    <i class="fas fa-pause"></i>
+                    Pause
+                </button>
+                <button id="resumeBtn" class="btn-control btn-resume" style="display: none;">
+                    <i class="fas fa-play"></i>
+                    Resume
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Stats Cards -->
+    <div class="stats-container">
+        <div class="stat-card">
+            <h3>Total Pairs</h3>
+            <div class="stat-value">
+                <div class="stat-icon activity">
+                    <i class="fas fa-coins"></i>
+                </div>
+                <span id="totalPairs">@Model.Count</span>
+            </div>
+        </div>
+
+        <div class="stat-card">
+            <h3>Active Trading</h3>
+            <div class="stat-value">
+                <div class="stat-icon trending">
+                    <i class="fas fa-chart-line"></i>
+                </div>
+                <span id="activePairs">@Model.Count(m => m.Change != 0)</span>
+            </div>
+        </div>
+
+        <div class="stat-card">
+            <h3>Positive Moves</h3>
+            <div class="stat-value">
+                <div class="stat-icon positive">
+                    <i class="fas fa-trending-up"></i>
+                </div>
+                <span id="positivePairs">@Model.Count(m => m.Change > 0)</span>
+                <small class="stat-total">/ @Model.Count</small>
+            </div>
+        </div>
+    </div>
+
+    <!-- Trading Table -->
+    <div class="trading-card">
+        <div class="trading-card-header">
+            <h2>
+                <i class="fas fa-chart-area"></i>
+                Live Currency Pairs
+                <div class="live-indicator">
+                    <div class="live-dot"></div>
+                    <span>Live</span>
+                </div>
+            </h2>
+        </div>
+
+        <div class="table-container">
+            <table id="tradingTable" class="trading-table">
+                <thead>
+                    <tr>
+                        <th><i class="fas fa-exchange-alt"></i> Currency Pair</th>
+                        <th><i class="fas fa-info-circle"></i> Description</th>
+                        <th><i class="fas fa-dollar-sign"></i> Current Rate</th>
+                        <th><i class="fas fa-chart-line"></i> Change</th>
+                        <th><i class="fas fa-percentage"></i> Change %</th>
+                        <th><i class="fas fa-arrow-down"></i> Min Value</th>
+                        <th><i class="fas fa-arrow-up"></i> Max Value</th>
+                        <th><i class="fas fa-clock"></i> Last Update</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var pair in Model)
+                    {
+                        <tr data-pair-id="@pair.PairId">
+                            <td>
+                                <div class="currency-pair">@pair.BaseCurrencyAbbreviation/@pair.QuoteCurrencyAbbreviation</div>
+                            </td>
+                            <td>
+                                <div class="currency-description">@pair.BaseCurrencyName / @pair.QuoteCurrencyName</div>
+                            </td>
+                            <td class="current-rate">@pair.CurrentRate.ToString("F4")</td>
+                            <td class="change-cell @(pair.Change > 0 ? "change-positive" : pair.Change < 0 ? "change-negative" : "change-neutral")">
+                                @if (pair.Change > 0)
+                                {
+                                    <i class="fas fa-arrow-up change-icon"></i>
+                                    <span>+@pair.Change.ToString("F4")</span>
+                                }
+                                else if (pair.Change < 0)
+                                {
+                                    <i class="fas fa-arrow-down change-icon"></i>
+                                    <span>@pair.Change.ToString("F4")</span>
+                                }
+                                else
+                                {
+                                    <i class="fas fa-minus change-icon"></i>
+                                    <span>@pair.Change.ToString("F4")</span>
+                                }
+                            </td>
+                            <td>
+                                <span class="percent-badge @(pair.ChangePercent > 0 ? "percent-positive" : pair.ChangePercent < 0 ? "percent-negative" : "percent-neutral")">
+                                    @(pair.ChangePercent > 0 ? "+" : "")@pair.ChangePercent.ToString("F2")%
+                                </span>
+                            </td>
+                            <td class="min-value">@pair.MinValue.ToString("F4")</td>
+                            <td class="max-value">@pair.MaxValue.ToString("F4")</td>
+                            <td class="last-update">@pair.LastUpdate.ToString("HH:mm:ss")</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Notifications Container -->
+<div id="notifications"></div>
+
+@section Scripts {
+    <script src="~/js/trading.js"></script>
+}

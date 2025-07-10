@@ -1,34 +1,56 @@
-using Microsoft.EntityFrameworkCore;
-using Microsoft.AspNetCore.SignalR;
-using CurrencyTrading.Data.Context;
+
 using CurrencyTrading.Business.Services;
-using CurrencyTrading.Data.Repositories; // הוספת ריפוזיטוריות
+using CurrencyTrading.Data.Context;
+using Microsoft.EntityFrameworkCore;
+using CurrencyTrading.Data.Repositories;
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Services.AddSignalR();  // הוספת SignalR לשירותים
-
-// הוספת Entity Framework
+// Add Entity Framework
 builder.Services.AddDbContext<CurrencyTradingContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
-// הוספת שירותי ה-DI (Dependency Injection)
-builder.Services.AddScoped<ITradingService, TradingService>(); // שירות המסחר
-builder.Services.AddScoped<ICurrencyRepository, CurrencyRepository>(); // ריפוזיטוריית המטבעות
+// Add SignalR
+builder.Services.AddSignalR();
 
-// הוספת תמיכה ב-Controllers עם Views (MVC)
+// Add DI services
+builder.Services.AddScoped<ICurrencyRepository, CurrencyRepository>();
+builder.Services.AddSingleton<ITradingService, TradingService>();
+
+// Add Controllers with Views (MVC)
 builder.Services.AddControllersWithViews();
-builder.Services.AddSingleton<IHubContext<TradingHub>>();  // הוספת ה-IHubContext
+
+// Add API Controllers
+builder.Services.AddControllers();
 
 var app = builder.Build();
 
-// הגדרת ה-Route של האפליקציה
+// Configure the HTTP request pipeline
+if (!app.Environment.IsDevelopment())
+{
+    app.UseExceptionHandler("/Home/Error");
+    app.UseHsts();
+}
+
+app.UseHttpsRedirection();
+app.UseStaticFiles();
+app.UseRouting();
+app.UseAuthorization();
+
+// Configure routes
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}");
 
+// Map API controllers
+app.MapControllers();
 
-app.MapHub<TradingHub>("/tradingHub");
-// הרצת האפליקציה
+
+// Initialize database
+using (var scope = app.Services.CreateScope())
+{
+    var context = scope.ServiceProvider.GetRequiredService<CurrencyTradingContext>();
+    context.Database.EnsureCreated();
+}
 
 app.Run();

@@ -1,4 +1,5 @@
-﻿using CurrencyTrading.Data.Models;
+﻿
+using CurrencyTrading.Data.Models;
 
 namespace CurrencyTrading.Data.Repositories
 {

@@ -1,6 +1,6 @@
-using CurrencyTrading.Business.Services;
-using CurrencyTrading.Business.Models;
+
 using Microsoft.AspNetCore.Mvc;
+using CurrencyTrading.Business.Services;
 
 namespace CurrencyTrading.UI.Controllers
 {
@@ -8,23 +8,29 @@ namespace CurrencyTrading.UI.Controllers
     {
         private readonly ITradingService _tradingService;
 
-        // קונסטרוקטור המקבל את השירות של המסחר
         public HomeController(ITradingService tradingService)
         {
             _tradingService = tradingService;
         }
 
-        // פעולה זו מחזירה את כל הנתונים של שערי המטבעות
         public async Task<IActionResult> Index()
         {
-            var rates = await _tradingService.GetCurrentRatesAsync(); // קריאה לשירות כדי לקבל את שערי המטבעות הנוכחיים
-            return View(rates); // שולח את המידע לתצוגה
-        }
+            try
+            {
+                // Start simulation if not running
+                if (!_tradingService.IsRunning)
+                {
+                    await _tradingService.StartSimulationAsync();
+                }
 
-        // פעולת פרטיות (Privacy) - לא משמשת כרגע
-        public IActionResult Privacy()
-        {
-            return View();
+                var currentRates = await _tradingService.GetCurrentRatesViewAsync();
+                return View(currentRates);
+            }
+            catch (Exception ex)
+            {
+                ViewBag.Error = ex.Message;
+                return View(new List<CurrencyTrading.Business.Models.CurrencyPairViewModel>());
+            }
         }
     }
 }

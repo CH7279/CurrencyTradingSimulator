@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿
+using Microsoft.EntityFrameworkCore;
 using CurrencyTrading.Data.Context;
 using CurrencyTrading.Data.Models;
 
@@ -29,6 +30,7 @@ namespace CurrencyTrading.Data.Repositories
                 pair.MinValue = newMinValue;
                 pair.MaxValue = newMaxValue;
                 await _context.SaveChangesAsync();
+                Console.WriteLine($"Updated DB: Pair {pairId} - Min: {newMinValue:F4}, Max: {newMaxValue:F4}");
             }
         }
     }
