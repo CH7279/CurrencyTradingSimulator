@@ -50,6 +50,3 @@ This application simulates the trading of different currency pairs and updates t
    - After restoring the dependencies, you can run the application using the following command:
    ```bash
    dotnet run
-
-
-
